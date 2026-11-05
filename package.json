@@ -15,32 +15,32 @@
         "qa": "npm run lint && npm run build && npm run audit"
     },
     "dependencies": {
-        "@blade-flags/core": "^0.1.3",
-        "@inertiajs/vue3": "^3.0.0",
-        "@lucide/vue": "^1.41.0",
+        "@blade-flags/core": "^0.3.0",
+        "@inertiajs/vue3": "^3.11.0",
+        "@lucide/vue": "^1.66.0",
         "@primeuix/themes": "^2.0.3",
         "@vueuse/core": "^14",
         "chokidar": "^5.0.0",
-        "laravel-vue-i18n": "^2.8.0",
+        "laravel-vue-i18n": "^2.9.0",
         "primevue": "^4.4.0",
         "vue": "^3.5.0"
     },
     "devDependencies": {
-        "@eslint/js": "^10.0.0",
-        "@laravel/vite-plugin-wayfinder": "^0.1.7",
-        "@tailwindcss/vite": "^4.0.0",
+        "@eslint/js": "^10.0.1",
+        "@laravel/vite-plugin-wayfinder": "^0.1.11",
+        "@tailwindcss/vite": "^4.3.4",
         "@types/node": "^25.6.2",
-        "@vitejs/plugin-vue": "^6.0.0",
+        "@vitejs/plugin-vue": "^6.0.10",
         "eslint-config-prettier": "^10.1.0",
-        "eslint-plugin-vue": "^10.2.0",
-        "globals": "^17.6.0",
-        "laravel-vite-plugin": "^3.1.0",
-        "prettier": "^3.6.0",
+        "eslint-plugin-vue": "^10.12.0",
+        "globals": "^17.14.0",
+        "laravel-vite-plugin": "^3.2.0",
+        "prettier": "^3.9.10",
         "tailwindcss": "^4.0.0",
         "typescript": "^6.0.3",
         "typescript-eslint": "^8.31.0",
         "vite": "^8.3.0",
-        "vue-eslint-parser": "^10.1.0",
-        "vue-tsc": "^3.0.0"
+        "vue-eslint-parser": "^10.4.1",
+        "vue-tsc": "^3.3.14"
     }
 }
