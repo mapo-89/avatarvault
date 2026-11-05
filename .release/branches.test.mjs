@@ -8,6 +8,33 @@ import { planRelease, preparedNotes, verifyPreparedRelease } from './release.mjs
 
 const script = fileURLToPath(new URL('./branches.mjs', import.meta.url))
 const publisher = fileURLToPath(new URL('./publish-changelog.mjs', import.meta.url))
+const avatarVaultConfig = JSON.parse(readFileSync(new URL('./config.json', import.meta.url), 'utf8'))
+const avatarVaultVersion = readFileSync(new URL('../config/app-version.json', import.meta.url), 'utf8')
+
+test('AvatarVault preparation replaces development metadata and validates its own version file', context => {
+    const f = fixture(context)
+    // CI authorization is covered separately; this fixture exercises the real version adapter.
+    const settings = structuredClone(avatarVaultConfig)
+    delete settings.branch_workflow.prepare_ci
+    f.configure(settings)
+    mkdirSync('config')
+    writeFileSync('config/app-version.json', avatarVaultVersion)
+    f.git('add', '.release/config.json', 'config/app-version.json')
+    f.commit('🔧 Chore: Configure AvatarVault version')
+    startRelease('1.0.0')
+    f.commit('🐛 Fix: Complete application versioning')
+    prepareRelease()
+    const metadata = JSON.parse(readFileSync('config/app-version.json', 'utf8'))
+    assert.deepEqual(metadata, {
+        release_version: '1.0.0', display_version: '1.0.0', image_version: '1.0.0', commit: '', commit_date: '',
+    })
+    verifyPreparedRelease('HEAD', '1.0.0')
+    metadata.release_version = '1.6.3'
+    writeFileSync('config/app-version.json', JSON.stringify(metadata))
+    f.git('add', 'config/app-version.json')
+    f.git('commit', '-q', '--amend', '--no-edit')
+    assert.throws(() => verifyPreparedRelease('HEAD', '1.0.0'), /Prepare version 1.0.0/)
+})
 
 function setup(context) {
     const f = fixture(context)

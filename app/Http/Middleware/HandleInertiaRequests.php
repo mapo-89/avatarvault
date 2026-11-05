@@ -35,7 +35,10 @@ class HandleInertiaRequests extends Middleware
     protected function hostSharedProps(Request $request): array
     {
         return [
-            'corePanel' => ['settings' => ['ui' => ['primary_color_token' => app(SettingsRepository::class)->get('ui', 'primary_color_token', '#7134dd')]]],
+            'corePanel' => [
+                'shortName' => 'AvatarVault',
+                'settings' => ['ui' => ['primary_color_token' => app(SettingsRepository::class)->get('ui', 'primary_color_token', '#7134dd')]],
+            ],
             'appLogo' => fn () => app(SettingsLogoManager::class)->currentUrl() ?? asset('images/brand/icon.svg'),
             'appSubtitle' => fn () => app(SettingsRepository::class)->get('general', 'app_subtitle') ?? __('avatarvault.hero_note'),
         ];

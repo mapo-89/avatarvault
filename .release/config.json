@@ -6,6 +6,12 @@
     "language": "en",
     "publisher": "github",
     "version_commit": false,
+    "version_files": [
+        {
+            "path": "config/app-version.json",
+            "keys": ["release_version"]
+        }
+    ],
     "release_branches": [
         "main"
     ],

@@ -10,6 +10,14 @@ use Tests\TestCase;
 
 class AvatarTest extends TestCase
 {
+    public function test_pages_expose_the_host_application_version(): void
+    {
+        $version = json_decode(file_get_contents(config_path('app-version.json')), true, flags: JSON_THROW_ON_ERROR);
+        $this->get('/')->assertInertia(fn (Assert $page) => $page
+            ->where('corePanel.version', $version['release_version'])
+            ->where('corePanel.shortName', 'AvatarVault'));
+    }
+
     public function test_dashboard_requires_login(): void
     {
         $this->get('/dashboard')->assertRedirect('/login');

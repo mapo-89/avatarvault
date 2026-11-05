@@ -263,6 +263,15 @@ ESLint, Prettier, TypeScript, Build und Dependency-Audit.
 
 ## Releases
 
+Die eigene AvatarVault-Version steht in `config/app-version.json`. CorePanel
+liest diese Host-Datei für Versionsanzeige und Systeminformationen. Der erste
+Entwicklungsstand heißt `1.0.0-dev`. Nach erfolgreicher CI setzt `prepare` auf
+dem Release-Branch die Release-, Anzeige- und Image-Version auf `1.0.0` bzw.
+die Branch-Version und leert die Commit-Identitätsfelder. Die Veröffentlichung
+prüft diese Metadaten am vorbereiteten Release-Merge vor dem Tag `vX.Y.Z`.
+Normale Commits ändern die Version nicht; die CorePanel-Paketversion bleibt
+davon unabhängig.
+
 Der [gemeinsame Release-Leitfaden](.release/README.md) beschreibt Commit-Regeln,
 Dependency-Updates und den Ablauf `main → feature/* → release/X.Y.Z → main`.
 Direkte kategorisierte Commits auf dem Release-Branch sind ebenfalls möglich.

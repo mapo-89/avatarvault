@@ -266,6 +266,14 @@ Licensed under the [MIT License](LICENSE.md).
 
 ## Shared release workflow
 
+AvatarVault owns `config/app-version.json`; CorePanel reads this host file for
+the version badge and system information. The initial working version is
+`1.0.0-dev`. After the required CI succeeds, the release branch's `prepare` step
+sets the release, display and image versions to `1.0.0` (or the branch version)
+and clears commit identity fields. Publication validates this metadata against
+the prepared release merge before creating its `vX.Y.Z` tag. Ordinary commits
+do not change the version; the CorePanel package version remains independent.
+
 Commit types, explicit release triggers, and grouped release notes follow the
 [shared release standard](.release/README.md). Ordinary pushes do not publish
 production versions. Existing builds, artifact handling, and deployment approvals
