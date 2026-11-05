@@ -38,6 +38,7 @@ class AvatarController extends Controller
             'avatar' => ['required', 'image', 'mimes:jpg,jpeg,png,gif,webp', 'max:2048'],
         ]);
         $user = $request->user();
+        $user->unsetRelation('media');
         $user->addMedia($validated['avatar'])->toMediaCollection('avatars');
         $this->removeLegacyPhoto($user);
         $this->removeApiPhoto($user->email);
@@ -48,6 +49,7 @@ class AvatarController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         $user = $request->user();
+        $user->unsetRelation('media');
         $user->clearMediaCollection('avatars');
         $this->removeLegacyPhoto($user);
         $this->removeApiPhoto($user->email);
