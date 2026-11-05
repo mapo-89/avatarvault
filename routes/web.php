@@ -1,25 +1,22 @@
 <?php
 
-use App\Domains\Auth\Controllers\AuthController;
+use App\Http\Controllers\AvatarController;
+use CorePanel\Support\Socialite\SocialiteProviderRegistry;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', fn (SocialiteProviderRegistry $providers) => Inertia::render('Welcome', [
+    'canRegister' => (bool) config('core-panel.auth.registration_enabled'),
+    'socialProviders' => $providers->enabledProviders(),
+]))->name('home');
 
-Route::get('/auth/{provider}',          [AuthController::class, 'redirect'])->name('auth.redirect');
-Route::get('/auth/{provider}/callback', [AuthController::class, 'callback'])->name('auth.callback');
+// Retain the old Authentik entrypoint while using CorePanel's OIDC callback flow.
+Route::get('/auth/authentik', fn () => redirect()->route('socialite.redirect', ['provider' => 'oidc']))->name('auth.redirect');
+Route::get('/user/profile', fn () => redirect()->route('profile.show'));
 
-// Optional: Alte spezifische Routen als Redirects (Backward Compatibility)
-Route::get('/auth/authentik', fn() => redirect()->route('auth.redirect', ['provider' => 'authentik']));
-Route::get('/auth/authentik/callback', fn() => redirect()->route('auth.callback', ['provider' => 'authentik']));
-
-Route::middleware([
-    'auth:sanctum',
-    config('jetstream.auth_session'),
-    'verified',
-])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+Route::middleware(['auth', 'core-panel.verified'])->group(function (): void {
+    Route::delete('/profile/account', [AvatarController::class, 'destroyAccount'])->name('account.destroy');
+    Route::get('/dashboard', [AvatarController::class, 'index'])->name('dashboard');
+    Route::post('/profile/avatar', [AvatarController::class, 'store'])->name('avatar.store');
+    Route::delete('/profile/avatar', [AvatarController::class, 'destroy'])->name('avatar.destroy');
 });

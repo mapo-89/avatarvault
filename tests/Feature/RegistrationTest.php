@@ -2,52 +2,31 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Fortify\Features;
-use Laravel\Jetstream\Jetstream;
+use App\Models\User;
 use Tests\TestCase;
 
 class RegistrationTest extends TestCase
 {
-    use RefreshDatabase;
-
     public function test_registration_screen_can_be_rendered(): void
     {
-        if (! Features::enabled(Features::registration())) {
-            $this->markTestSkipped('Registration support is not enabled.');
-        }
-
-        $response = $this->get('/register');
-
-        $response->assertStatus(200);
+        $this->get('/register')->assertOk();
     }
 
-    public function test_registration_screen_cannot_be_rendered_if_support_is_disabled(): void
+    public function test_new_users_can_register_without_uuid_conversion(): void
     {
-        if (Features::enabled(Features::registration())) {
-            $this->markTestSkipped('Registration support is enabled.');
-        }
-
-        $response = $this->get('/register');
-
-        $response->assertStatus(404);
-    }
-
-    public function test_new_users_can_register(): void
-    {
-        if (! Features::enabled(Features::registration())) {
-            $this->markTestSkipped('Registration support is not enabled.');
-        }
-
-        $response = $this->post('/register', [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-            'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature(),
-        ]);
-
+        $this->post('/register', [
+            'first_name' => 'Test', 'last_name' => 'User', 'email' => 'test@example.com',
+            'password' => 'new-password-123', 'password_confirmation' => 'new-password-123',
+        ])->assertSessionHasNoErrors()->assertRedirect('/dashboard');
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $user = User::where('email', 'test@example.com')->firstOrFail();
+        $this->assertIsInt($user->id);
+        $this->assertSame('Test User', $user->name);
+    }
+
+    public function test_registration_screen_is_unavailable_when_disabled(): void
+    {
+        config(['core-panel.auth.registration_enabled' => false]);
+        $this->get('/register')->assertNotFound();
     }
 }

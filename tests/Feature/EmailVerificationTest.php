@@ -14,13 +14,19 @@ class EmailVerificationTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['core-panel.auth.email_verification_enabled' => true]);
+    }
+
     public function test_email_verification_screen_can_be_rendered(): void
     {
         if (! Features::enabled(Features::emailVerification())) {
             $this->markTestSkipped('Email verification not enabled.');
         }
 
-        $user = User::factory()->withPersonalTeam()->unverified()->create();
+        $user = User::factory()->unverified()->create();
 
         $response = $this->actingAs($user)->get('/email/verify');
 
@@ -33,7 +39,7 @@ class EmailVerificationTest extends TestCase
             $this->markTestSkipped('Email verification not enabled.');
         }
 
-        Event::fake();
+        Event::fake([Verified::class]);
 
         $user = User::factory()->unverified()->create();
 

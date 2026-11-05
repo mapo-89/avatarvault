@@ -3,43 +3,20 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Str;
-use Laravel\Jetstream\Features;
-use Laravel\Jetstream\Http\Livewire\ApiTokenManager;
-use Livewire\Livewire;
+use CorePanel\Domain\ApiToken\Actions\CreateApiTokenAction;
 use Tests\TestCase;
 
 class ApiTokenPermissionsTest extends TestCase
 {
-    use RefreshDatabase;
-
-    public function test_api_token_permissions_can_be_updated(): void
+    public function test_replacing_a_token_preserves_scopes_and_revokes_the_old_token(): void
     {
-        if (! Features::hasApiFeatures()) {
-            $this->markTestSkipped('API support is not enabled.');
-        }
-
-        $this->actingAs($user = User::factory()->withPersonalTeam()->create());
-
-        $token = $user->tokens()->create([
-            'name' => 'Test Token',
-            'token' => Str::random(40),
-            'abilities' => ['create', 'read'],
-        ]);
-
-        Livewire::test(ApiTokenManager::class)
-            ->set(['managingPermissionsFor' => $token])
-            ->set(['updateApiTokenForm' => [
-                'permissions' => [
-                    'delete',
-                    'missing-permission',
-                ],
-            ]])
-            ->call('updateApiToken');
-
-        $this->assertTrue($user->fresh()->tokens->first()->can('delete'));
-        $this->assertFalse($user->fresh()->tokens->first()->can('read'));
-        $this->assertFalse($user->fresh()->tokens->first()->can('missing-permission'));
+        $this->configurePassportKeys();
+        $user = User::factory()->create();
+        $token = app(CreateApiTokenAction::class)->execute($user, 'Test Token', ['read'])['token'];
+        $this->actingAs($user)->post('/admin/api-tokens/'.$token->id.'/replace')->assertSessionHasNoErrors()->assertSessionHas('apiToken');
+        $this->assertTrue($token->fresh()->revoked);
+        $active = $user->tokens()->where('revoked', false)->firstOrFail();
+        $this->assertTrue($active->can('read'));
+        $this->assertFalse($active->can('delete'));
     }
 }
