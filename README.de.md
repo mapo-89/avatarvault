@@ -1,6 +1,8 @@
-# AvatarVault
+<p align="center">
+  <img src="public/images/brand/readme-logo.svg" alt="AvatarVault — self-hosted avatar service" width="480">
+</p>
 
-<img src="public/images/brand/logo.svg" alt="AvatarVault" width="310">
+# AvatarVault
 
 [![CI](https://github.com/mapo-89/avatarvault/actions/workflows/ci.yml/badge.svg)](https://github.com/mapo-89/avatarvault/actions/workflows/ci.yml)
 [![Latest Release](https://img.shields.io/github/v/release/mapo-89/avatarvault)](https://github.com/mapo-89/avatarvault/releases)
@@ -263,14 +265,13 @@ ESLint, Prettier, TypeScript, Build und Dependency-Audit.
 
 ## Releases
 
-Die eigene AvatarVault-Version steht in `config/app-version.json`. CorePanel
-liest diese Host-Datei für Versionsanzeige und Systeminformationen. Der erste
+Die AvatarVault-Version steht in `config/app-version.json` und erscheint in
+der Versionsanzeige und den Systeminformationen. Der erste
 Entwicklungsstand heißt `1.0.0-dev`. Nach erfolgreicher CI setzt `prepare` auf
 dem Release-Branch die Release-, Anzeige- und Image-Version auf `1.0.0` bzw.
 die Branch-Version und leert die Commit-Identitätsfelder. Die Veröffentlichung
 prüft diese Metadaten am vorbereiteten Release-Merge vor dem Tag `vX.Y.Z`.
-Normale Commits ändern die Version nicht; die CorePanel-Paketversion bleibt
-davon unabhängig.
+Normale Commits ändern die Version nicht.
 
 Der [gemeinsame Release-Leitfaden](.release/README.md) beschreibt Commit-Regeln,
 Dependency-Updates und den Ablauf `main → feature/* → release/X.Y.Z → main`.

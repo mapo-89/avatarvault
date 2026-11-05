@@ -1,6 +1,8 @@
-# AvatarVault
+<p align="center">
+  <img src="public/images/brand/readme-logo.svg" alt="AvatarVault — self-hosted avatar service" width="480">
+</p>
 
-<img src="public/images/brand/logo.svg" alt="AvatarVault" width="310">
+# AvatarVault
 
 [![CI](https://github.com/mapo-89/avatarvault/actions/workflows/ci.yml/badge.svg)](https://github.com/mapo-89/avatarvault/actions/workflows/ci.yml)
 [![Latest Release](https://img.shields.io/github/v/release/mapo-89/avatarvault)](https://github.com/mapo-89/avatarvault/releases)
@@ -266,13 +268,13 @@ Licensed under the [MIT License](LICENSE.md).
 
 ## Shared release workflow
 
-AvatarVault owns `config/app-version.json`; CorePanel reads this host file for
+The application version is stored in `config/app-version.json` and appears in
 the version badge and system information. The initial working version is
 `1.0.0-dev`. After the required CI succeeds, the release branch's `prepare` step
 sets the release, display and image versions to `1.0.0` (or the branch version)
 and clears commit identity fields. Publication validates this metadata against
 the prepared release merge before creating its `vX.Y.Z` tag. Ordinary commits
-do not change the version; the CorePanel package version remains independent.
+do not change the version.
 
 Commit types, explicit release triggers, and grouped release notes follow the
 [shared release standard](.release/README.md). Ordinary pushes do not publish
