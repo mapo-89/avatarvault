@@ -84,6 +84,7 @@ class AvatarController extends Controller
     {
         $disk = Storage::disk(config('avatar-manager.disk'));
         $hash = AvatarManager::hash($email);
+        $disk->delete('avatars/hashes/'.hash('sha256', strtolower(trim($email))).'.md5');
 
         foreach (['jpg', 'jpeg', 'png', 'gif', 'webp'] as $extension) {
             $disk->delete('avatars/'.$hash.'.'.$extension);

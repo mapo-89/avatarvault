@@ -160,7 +160,20 @@ $url = AvatarManager::url('user@example.com');
 <img src="https://avatars.example.com/avatar/EMAIL_MD5_HASH" alt="Avatar" width="80" height="80">
 ```
 
-Hash URLs are public identifiers. MD5 does not anonymize email addresses and
+The endpoint accepts MD5 (32 hexadecimal characters) and SHA-256 (64 hexadecimal
+characters), including uppercase hashes. Hash the trimmed, lowercase email:
+
+```php
+$hash = hash('sha256', strtolower(trim('user@example.com')));
+$url = url('/avatar/'.$hash);
+```
+
+Both formats resolve the same profile picture for primary addresses and verified
+aliases. New API uploads also support both formats without an account. Re-upload
+older API-only images to enable SHA-256 when their email has no account; the
+original email cannot be recovered from an old MD5 filename.
+
+Hash URLs are public identifiers. Hashing does not anonymize email addresses and
 provides no access control. Changing the account email changes the avatar URL.
 Managed profile images take precedence over earlier API uploads; unknown hashes
 return the bundled default image. Invalid hash formats return `404`.

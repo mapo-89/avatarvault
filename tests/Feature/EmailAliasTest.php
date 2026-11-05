@@ -62,6 +62,7 @@ class EmailAliasTest extends TestCase
         $this->alias($owner);
         $owner->addMedia(UploadedFile::fake()->image('owner.jpg'))->toMediaCollection('avatars');
         $this->get('/avatar/'.md5('alias@example.com'))->assertOk()->assertHeader('content-type', 'image/png');
+        $this->get('/avatar/'.hash('sha256', 'alias@example.com'))->assertOk()->assertHeader('content-type', 'image/png');
     }
 
     public function test_verified_alias_tracks_profile_replacement_and_deletion(): void
@@ -72,11 +73,11 @@ class EmailAliasTest extends TestCase
         $file = UploadedFile::fake()->image('owner.jpg');
         $bytes = file_get_contents($file->getRealPath());
         $this->actingAs($owner)->post('/profile/avatar', ['avatar' => $file])->assertSessionHasNoErrors();
-        $this->assertSame($bytes, $this->get('/avatar/'.md5('alias@example.com'))->assertOk()->streamedContent());
+        $this->assertSame($bytes, $this->get('/avatar/'.hash('sha256', 'alias@example.com'))->assertOk()->streamedContent());
         $new = UploadedFile::fake()->image('new.png', 50, 50);
         $replacement = file_get_contents($new->getRealPath());
         $this->post('/profile/avatar', ['avatar' => $new])->assertSessionHasNoErrors();
-        $this->assertSame($replacement, $this->get('/avatar/'.strtoupper(md5('alias@example.com')))->assertOk()->streamedContent());
+        $this->assertSame($replacement, $this->get('/avatar/'.strtoupper(hash('sha256', 'alias@example.com')))->assertOk()->streamedContent());
         $this->delete('/profile/avatar')->assertSessionHasNoErrors();
         $this->get('/avatar/'.md5('alias@example.com'))->assertOk()->assertHeader('content-type', 'image/png');
         $this->assertSame(0, $owner->fresh()->getMedia('avatars')->count());

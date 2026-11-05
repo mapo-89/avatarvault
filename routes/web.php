@@ -12,7 +12,7 @@ Route::get('/', fn (SocialiteProviderRegistry $providers) => Inertia::render('We
     'socialProviders' => $providers->enabledProviders(),
 ]))->name('home');
 
-Route::get('/avatar/{hash}', PublicAvatarController::class)->where('hash', '[a-fA-F0-9]{32}')->name('avatar.show');
+Route::get('/avatar/{hash}', PublicAvatarController::class)->where('hash', '(?:[a-fA-F0-9]{32}|[a-fA-F0-9]{64})')->name('avatar.show');
 
 // Retain the old Authentik entrypoint while using CorePanel's OIDC callback flow.
 Route::get('/auth/authentik', fn () => redirect()->route('socialite.redirect', ['provider' => 'oidc']))->name('auth.redirect');

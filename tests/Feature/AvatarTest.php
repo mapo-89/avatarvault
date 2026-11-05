@@ -18,6 +18,46 @@ class AvatarTest extends TestCase
             ->where('corePanel.shortName', 'AvatarVault'));
     }
 
+    public function test_sha256_and_md5_resolve_the_same_managed_avatar(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create(['email' => 'USER@example.com']);
+        $user->addMedia(UploadedFile::fake()->image('profile.jpg'))->toMediaCollection('avatars');
+        $expected = $this->get('/avatar/'.md5('user@example.com'))->assertOk()->streamedContent();
+        $response = $this->get('/avatar/'.strtoupper(hash('sha256', 'user@example.com')).'?s=128')->assertOk();
+        $this->assertSame($expected, $response->streamedContent());
+    }
+
+    public function test_sha256_api_uploads_work_without_a_registered_account_and_follow_replacements(): void
+    {
+        Storage::fake('public');
+        config(['avatar-manager.api_keys' => ['test-key']]);
+        $email = 'api@example.com';
+        foreach (['first.jpg', 'second.png'] as $filename) {
+            $file = UploadedFile::fake()->image($filename);
+            $bytes = file_get_contents($file->getRealPath());
+            $this->withHeader('X-API-KEY', 'test-key')->postJson('/api/avatars/upload', [
+                'email' => $email, 'avatar' => $file,
+            ])->assertOk();
+            foreach ([md5($email), hash('sha256', $email)] as $hash) {
+                $this->assertSame($bytes, $this->get('/avatar/'.$hash)->assertOk()->streamedContent());
+            }
+        }
+        $owner = User::factory()->create(['email' => $email]);
+        $this->actingAs($owner)->delete('/profile/avatar')->assertSessionHasNoErrors();
+        Storage::disk('public')->assertMissing('avatars/hashes/'.hash('sha256', $email).'.md5');
+        $this->get('/avatar/'.hash('sha256', $email))->assertOk()->assertHeader('content-type', 'image/png');
+    }
+
+    public function test_unknown_sha256_returns_the_default_and_invalid_hashes_are_rejected(): void
+    {
+        Storage::fake('public');
+        $this->get('/avatar/'.hash('sha256', 'unknown@example.com'))->assertOk()->assertHeader('content-type', 'image/png');
+        foreach ([str_repeat('a', 63), str_repeat('a', 65), str_repeat('z', 64)] as $hash) {
+            $this->get('/avatar/'.$hash)->assertNotFound();
+        }
+    }
+
     public function test_dashboard_requires_login(): void
     {
         $this->get('/dashboard')->assertRedirect('/login');

@@ -161,7 +161,22 @@ $url = AvatarManager::url('user@example.com');
 <img src="https://avatars.example.com/avatar/EMAIL_MD5_HASH" alt="Avatar" width="80" height="80">
 ```
 
-Hash-URLs sind öffentlich. MD5 anonymisiert keine E-Mail-Adressen und ist kein
+Der Endpunkt akzeptiert MD5 (32 Hexadezimalzeichen) und SHA-256 (64
+Hexadezimalzeichen), auch in Großbuchstaben. Vor dem Hashen Leerzeichen am
+Anfang und Ende entfernen und die E-Mail-Adresse kleinschreiben:
+
+```php
+$hash = hash('sha256', strtolower(trim('user@example.com')));
+$url = url('/avatar/'.$hash);
+```
+
+Beide Formate liefern für Hauptadressen und bestätigte Aliasse dasselbe Bild.
+Neue API-Uploads unterstützen beide Formate auch ohne Konto. Ältere reine
+API-Bilder ohne zugehöriges Konto müssen erneut hochgeladen werden, um SHA-256
+zu aktivieren; aus einem alten MD5-Dateinamen lässt sich die Adresse nicht
+wiederherstellen.
+
+Hash-URLs sind öffentlich. Hashing anonymisiert keine E-Mail-Adressen und ist kein
 Zugriffsschutz. Bei einer neuen E-Mail-Adresse ändert sich die URL. Verwaltete
 Profilbilder haben Vorrang vor alten API-Uploads. Unbekannte Hashes liefern das
 mitgelieferte Standardbild; ungültige Hash-Formate liefern `404`.
