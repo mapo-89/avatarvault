@@ -29,7 +29,7 @@
         "@eslint/js": "^10.0.0",
         "@laravel/vite-plugin-wayfinder": "^0.1.7",
         "@tailwindcss/vite": "^4.0.0",
-        "@types/node": "^25.6.2",
+        "@types/node": "^26.6.6",
         "@vitejs/plugin-vue": "^6.0.0",
         "eslint-config-prettier": "^10.1.0",
         "eslint-plugin-vue": "^10.2.0",
