@@ -1,0 +1,22 @@
+{
+    "schema": 1,
+    "repository": "avatarvault",
+    "hosting": "github",
+    "tag_prefix": "v",
+    "language": "en",
+    "publisher": "github",
+    "version_commit": false,
+    "release_branches": [
+        "main"
+    ],
+    "branch_workflow": {
+        "main": "main",
+        "release_prefix": "release/",
+        "prepare_ci": {
+            "workflows": [
+                "ci.yml",
+                "release-policy.yml"
+            ]
+        }
+    }
+}
