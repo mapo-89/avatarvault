@@ -18,6 +18,11 @@ class AvatarController extends Controller
         $user = $request->user();
 
         return Inertia::render('Avatar/Dashboard', [
+            'emailAliases' => $user->emailAliases()->orderBy('id')->get()->map(fn ($alias) => [
+                'id' => $alias->id, 'email' => $alias->email, 'verified' => $alias->verified_at !== null,
+                'url' => $alias->verified_at !== null ? AvatarManager::url($alias->email) : null,
+            ]),
+            'aliasLimit' => config('avatarvault.email_aliases.max_per_user'),
             'avatar' => [
                 'url' => AvatarManager::url($user->email),
                 'hash' => AvatarManager::hash($user->email),

@@ -1,6 +1,27 @@
 <?php
 
 return [
+    'alias_active' => 'Bestätigt',
+    'alias_add' => 'Alias hinzufügen',
+    'alias_description' => 'Nutze dasselbe Profilbild für weitere E-Mail-Adressen. Jede bestätigte Adresse erhält ihre eigene Avatar-URL. Ein neues Profilbild gilt automatisch für alle Adressen.',
+    'alias_email' => 'Weitere E-Mail-Adresse',
+    'alias_empty' => 'Noch keine E-Mail-Aliasse vorhanden.',
+    'alias_limit' => 'Die maximale Anzahl an Aliassen ist erreicht. Entferne zuerst einen nicht mehr benötigten Alias.',
+    'alias_mail_description' => 'Bestätige :email, um dein AvatarVault-Profilbild auch für diese Adresse zu verwenden.',
+    'alias_mail_expiry' => 'Dieser Link ist :minutes Minuten gültig. Melde dich vor der Bestätigung in dem Konto an, das diese Adresse hinzugefügt hat.',
+    'alias_mail_ignore' => 'Wenn du diesen Alias nicht angefordert hast, ignoriere diese Nachricht. Deine Adresse wird dann nicht aktiviert.',
+    'alias_mail_subject' => 'Deinen AvatarVault-E-Mail-Alias bestätigen',
+    'alias_pending' => 'Bestätigung ausstehend',
+    'alias_remove' => 'Alias entfernen',
+    'alias_remove_confirmation' => 'Diesen E-Mail-Alias entfernen? Deine Hauptadresse und dein Profilbild bleiben verfügbar.',
+    'alias_removed' => 'E-Mail-Alias entfernt.',
+    'alias_resend' => 'Bestätigung erneut senden',
+    'alias_sent' => 'Ein Bestätigungslink wurde an die zusätzliche E-Mail-Adresse gesendet.',
+    'alias_title' => 'E-Mail-Aliasse',
+    'alias_unavailable' => 'Diese Adresse wird bereits als Hauptadresse oder bestätigter Alias verwendet.',
+    'alias_verification_note' => 'Bestätige den Link an die zusätzliche Adresse, während du in diesem Konto angemeldet bist. Aliasse gelten für Avatar-URLs, nicht für die Anmeldung.',
+    'alias_verified' => 'E-Mail-Alias bestätigt. Seine Avatar-URL verwendet jetzt dein Profilbild.',
+    'alias_verify' => 'E-Mail-Alias bestätigen',
 
     'saved' => 'Avatar gespeichert.',
     'removed' => 'Avatar entfernt.',

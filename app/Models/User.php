@@ -15,9 +15,11 @@ use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Passport\Contracts\OAuthenticatable;
 use Spatie\MediaLibrary\HasMedia;
@@ -92,8 +94,19 @@ final class User extends Authenticatable implements HasLocalePreference, HasMedi
     protected static function booted(): void
     {
         self::saving(function (self $user): void {
+            if ($user->isDirty('email') && EmailAlias::query()
+                ->where('verified_email_hash', md5(strtolower(trim($user->email))))
+                ->where('user_id', '!=', $user->id ?? 0)->exists()) {
+                throw ValidationException::withMessages(['email' => __('avatarvault.alias_unavailable')]);
+            }
+
             $user->name = trim(($user->first_name ?? '').' '.($user->last_name ?? '')) ?: ($user->name ?? '');
         });
+    }
+
+    public function emailAliases(): HasMany
+    {
+        return $this->hasMany(EmailAlias::class);
     }
 
     public function registerMediaCollections(): void

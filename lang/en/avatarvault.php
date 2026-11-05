@@ -1,6 +1,27 @@
 <?php
 
 return [
+    'alias_active' => 'Verified',
+    'alias_add' => 'Add alias',
+    'alias_description' => 'Use the same avatar with additional email addresses. Each verified address gets its own avatar URL; changing your picture updates all of them.',
+    'alias_email' => 'Additional email address',
+    'alias_empty' => 'No email aliases yet.',
+    'alias_limit' => 'The maximum number of aliases has been reached. Remove an unused alias first.',
+    'alias_mail_description' => 'Confirm :email to use your AvatarVault profile picture with this address.',
+    'alias_mail_expiry' => 'This link expires after :minutes minutes. Sign in to the account that added this address before confirming.',
+    'alias_mail_ignore' => 'If you did not request this alias, ignore this email. Your address will not be activated.',
+    'alias_mail_subject' => 'Confirm your AvatarVault email alias',
+    'alias_pending' => 'Awaiting confirmation',
+    'alias_remove' => 'Remove alias',
+    'alias_remove_confirmation' => 'Remove this email alias? Your primary address and profile picture will remain available.',
+    'alias_removed' => 'Email alias removed.',
+    'alias_resend' => 'Resend verification email',
+    'alias_sent' => 'A verification link has been sent to the additional email address.',
+    'alias_title' => 'Email aliases',
+    'alias_unavailable' => 'This address is already used as a primary address or verified alias.',
+    'alias_verification_note' => 'Confirm the link sent to the additional address while signed in to this account. Aliases are for avatar URLs, not for signing in.',
+    'alias_verified' => 'Email alias verified. Its avatar URL now uses your profile picture.',
+    'alias_verify' => 'Confirm email alias',
 
     'saved' => 'Avatar saved.',
     'removed' => 'Avatar removed.',

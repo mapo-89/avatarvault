@@ -4,12 +4,23 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3'
 import { trans as t } from 'laravel-vue-i18n'
 import AppLayout from '@core-panel/layouts/AppLayout.vue'
 
+type EmailAlias = {
+    id: number
+    email: string
+    verified: boolean
+    url: string | null
+}
 const props = defineProps<{
+    emailAliases: EmailAlias[]
+    aliasLimit: number
     avatar: { url: string; hash: string; uploaded: boolean; version: string }
 }>()
 const page = usePage<{
     auth: { user: { firstName: string; email: string } }
+    errors: Record<string, string>
 }>()
+const aliasForm = useForm({ email: '' })
+const aliasBusy = ref<number | null>(null)
 const accountForm = useForm({ password: '' })
 const form = useForm<{ avatar: File | null }>({ avatar: null })
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -52,6 +63,35 @@ function remove() {
         onFinish: () => {
             deleting.value = false
             clearPreview()
+        },
+    })
+}
+function addAlias() {
+    aliasForm.post('/profile/email-aliases', {
+        preserveScroll: true,
+        onSuccess: () => aliasForm.reset(),
+    })
+}
+function resendAlias(alias: EmailAlias) {
+    aliasBusy.value = alias.id
+    router.post(
+        `/profile/email-aliases/${alias.id}/resend`,
+        {},
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                aliasBusy.value = null
+            },
+        },
+    )
+}
+function removeAlias(alias: EmailAlias) {
+    if (!window.confirm(t('avatarvault.alias_remove_confirmation'))) return
+    aliasBusy.value = alias.id
+    router.delete(`/profile/email-aliases/${alias.id}`, {
+        preserveScroll: true,
+        onFinish: () => {
+            aliasBusy.value = null
         },
     })
 }
@@ -221,6 +261,143 @@ onBeforeUnmount(() => {
                     >
                 </section>
             </div>
+            <section
+                class="vault-panel vault-alias-panel"
+                aria-labelledby="email-aliases-title"
+            >
+                <div class="vault-panel-heading">
+                    <h2 id="email-aliases-title">
+                        {{ t('avatarvault.alias_title') }}
+                    </h2>
+                    <span class="vault-chip"
+                        >{{ props.emailAliases.length }} /
+                        {{ props.aliasLimit }}</span
+                    >
+                </div>
+                <p class="vault-muted">
+                    {{ t('avatarvault.alias_description') }}
+                </p>
+                <form class="vault-alias-form" @submit.prevent="addAlias">
+                    <div>
+                        <label for="alias-email" class="vault-file-label">{{
+                            t('avatarvault.alias_email')
+                        }}</label>
+                        <input
+                            id="alias-email"
+                            v-model="aliasForm.email"
+                            type="email"
+                            name="email"
+                            autocomplete="email"
+                            maxlength="255"
+                            required
+                            :disabled="
+                                aliasForm.processing ||
+                                props.emailAliases.length >= props.aliasLimit
+                            "
+                            class="vault-alias-input"
+                        />
+                    </div>
+                    <button
+                        class="vault-primary"
+                        type="submit"
+                        :disabled="
+                            aliasForm.processing ||
+                            props.emailAliases.length >= props.aliasLimit
+                        "
+                    >
+                        {{ t('avatarvault.alias_add') }}
+                    </button>
+                </form>
+                <p
+                    v-if="aliasForm.errors.email || page.props.errors?.email"
+                    class="vault-error"
+                    role="alert"
+                >
+                    {{ aliasForm.errors.email || page.props.errors?.email }}
+                </p>
+                <p class="vault-note">
+                    {{ t('avatarvault.alias_verification_note') }}
+                </p>
+                <p v-if="!props.emailAliases.length" class="vault-muted">
+                    {{ t('avatarvault.alias_empty') }}
+                </p>
+                <ul v-else class="vault-alias-list">
+                    <li
+                        v-for="alias in props.emailAliases"
+                        :key="alias.id"
+                        class="vault-alias-item"
+                    >
+                        <div class="vault-alias-address">
+                            <strong>{{ alias.email }}</strong>
+                            <span class="vault-chip">{{
+                                alias.verified
+                                    ? t('avatarvault.alias_active')
+                                    : t('avatarvault.alias_pending')
+                            }}</span>
+                        </div>
+                        <div
+                            v-if="alias.verified && alias.url"
+                            class="vault-copy-row"
+                        >
+                            <input
+                                :value="alias.url"
+                                :aria-label="
+                                    t('avatarvault.avatar_url') +
+                                    ': ' +
+                                    alias.email
+                                "
+                                readonly
+                                @focus="
+                                    ($event.target as HTMLInputElement).select()
+                                "
+                            />
+                            <button
+                                type="button"
+                                :aria-label="
+                                    t('avatarvault.copy_url') +
+                                    ': ' +
+                                    alias.email
+                                "
+                                @click="copy(alias.url!)"
+                            >
+                                {{ t('avatarvault.copy') }}
+                            </button>
+                        </div>
+                        <div class="vault-alias-actions">
+                            <button
+                                v-if="!alias.verified"
+                                type="button"
+                                class="vault-text-link"
+                                :disabled="aliasBusy !== null"
+                                @click="resendAlias(alias)"
+                            >
+                                {{ t('avatarvault.alias_resend') }}
+                            </button>
+                            <button
+                                type="button"
+                                class="vault-text-link"
+                                :disabled="aliasBusy !== null"
+                                :aria-label="
+                                    t('avatarvault.alias_remove') +
+                                    ': ' +
+                                    alias.email
+                                "
+                                @click="removeAlias(alias)"
+                            >
+                                {{ t('avatarvault.alias_remove') }}
+                            </button>
+                        </div>
+                    </li>
+                </ul>
+                <p
+                    v-if="copyStatus"
+                    role="status"
+                    aria-live="polite"
+                    class="vault-note"
+                >
+                    {{ copyStatus }}
+                </p>
+            </section>
             <details class="vault-panel mt-6">
                 <summary class="vault-text-link">
                     {{ t('avatarvault.delete_account') }}
