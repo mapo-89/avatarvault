@@ -1,12 +1,32 @@
 <script setup lang="ts">
 import { Head, Link, usePage } from '@inertiajs/vue3'
 import { trans as t } from 'laravel-vue-i18n'
+import { computed } from 'vue'
+import AppIcon from '@core-panel/components/AppIcon.vue'
+import { useColorMode } from '@core-panel/composables/useColorMode'
+import type { CorePanelColorModePreference } from '@core-panel/theme/core-panel'
 
 defineProps<{
     canRegister: boolean
     socialProviders: { provider: string; label: string }[]
 }>()
 const page = usePage<{ auth: { user: { firstName: string } | null } }>()
+const { colorMode, setColorMode } = useColorMode('system')
+const nextColorMode = computed<CorePanelColorModePreference>(() =>
+    colorMode.value === 'system'
+        ? 'light'
+        : colorMode.value === 'light'
+          ? 'dark'
+          : 'system',
+)
+const colorModeIcon = computed(() =>
+    nextColorMode.value === 'system'
+        ? 'desktop'
+        : nextColorMode.value === 'dark'
+          ? 'moon'
+          : 'sun',
+)
+const colorModeLabel = computed(() => t(`page-layout.${nextColorMode.value}`))
 </script>
 
 <template>
@@ -22,17 +42,28 @@ const page = usePage<{ auth: { user: { firstName: string } | null } }>()
                 />
                 <span>AvatarVault</span>
             </Link>
-            <Link
-                :href="page.props.auth.user ? '/dashboard' : '/login'"
-                class="vault-text-link"
-            >
-                {{
-                    page.props.auth.user
-                        ? t('avatarvault.dashboard')
-                        : t('avatarvault.login')
-                }}
-                <span aria-hidden="true">↗</span>
-            </Link>
+            <div class="vault-nav-actions">
+                <button
+                    type="button"
+                    class="vault-theme-toggle"
+                    :aria-label="colorModeLabel"
+                    :title="colorModeLabel"
+                    @click="setColorMode(nextColorMode)"
+                >
+                    <AppIcon :name="colorModeIcon" aria-hidden="true" />
+                </button>
+                <Link
+                    :href="page.props.auth.user ? '/dashboard' : '/login'"
+                    class="vault-text-link"
+                >
+                    {{
+                        page.props.auth.user
+                            ? t('avatarvault.dashboard')
+                            : t('avatarvault.login')
+                    }}
+                    <span aria-hidden="true">↗</span>
+                </Link>
+            </div>
         </nav>
         <main>
             <section class="vault-hero">
@@ -123,7 +154,7 @@ const page = usePage<{ auth: { user: { firstName: string } | null } }>()
         </main>
         <footer class="vault-footer">
             <span>AvatarVault</span><span>{{ t('avatarvault.footer') }}</span
-            ><a href="https://github.com/mapo-89/avatar-vault">GitHub ↗</a>
+            ><a href="https://github.com/mapo-89/avatarvault">GitHub ↗</a>
         </footer>
     </div>
 </template>
