@@ -1,44 +1,72 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use CorePanel\Models\Concerns\DeterminesCorePanelAdministrationAccess;
+use CorePanel\Models\Concerns\HasCorePanelGroups;
+use CorePanel\Models\Concerns\HasCorePanelInvitationStatus;
+use CorePanel\Models\Concerns\HasCorePanelSocialAccounts;
+use CorePanel\Models\Concerns\HasCorePanelUserStatus;
+use CorePanel\Models\Concerns\InteractsWithCorePanelPassport;
+use CorePanel\Models\Concerns\TracksCorePanelPresence;
+use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use Laravel\Jetstream\HasProfilePhoto;
-use Laravel\Sanctum\HasApiTokens;
+use Laravel\Passport\Contracts\OAuthenticatable;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+final class User extends Authenticatable implements HasLocalePreference, HasMedia, MustVerifyEmail, OAuthenticatable
 {
-    use HasApiTokens;
+    use DeterminesCorePanelAdministrationAccess;
+    use HasCorePanelGroups;
+    use HasCorePanelInvitationStatus;
+    use HasCorePanelSocialAccounts;
+    use HasCorePanelUserStatus;
 
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory;
-    use HasProfilePhoto;
+
+    use HasRoles;
+    use InteractsWithCorePanelPassport;
+    use InteractsWithMedia;
     use Notifiable;
+    use SoftDeletes;
+    use TracksCorePanelPresence;
     use TwoFactorAuthenticatable;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'name',
-        'email',
-        'password',
         'oidc_sub',
         'oidc_provider',
         'oidc_groups',
-        'email_verified_at',
+        'profile_photo_path',
+        'first_name',
+        'last_name',
+        'email',
+        'invitation_accepted_at',
+        'invited_at',
+        'locale',
+        'password',
+        'requires_password_setup',
+        'status',
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $hidden = [
         'password',
@@ -48,25 +76,50 @@ class User extends Authenticatable
     ];
 
     /**
-     * The accessors to append to the model's array form.
-     *
-     * @var array<int, string>
-     */
-    protected $appends = [
-        'profile_photo_url',
-    ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
      * @return array<string, string>
      */
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
             'oidc_groups' => 'array',
+            'email_verified_at' => 'datetime',
+            'invitation_accepted_at' => 'datetime',
+            'invited_at' => 'datetime',
+            'password' => 'hashed',
+            'requires_password_setup' => 'boolean',
+            'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        self::saving(function (self $user): void {
+            if ($user->isDirty('email') && EmailAlias::query()
+                ->where('verified_email_hash', md5(strtolower(trim($user->email))))
+                ->where('user_id', '!=', $user->id ?? 0)->exists()) {
+                throw ValidationException::withMessages(['email' => __('avatarvault.alias_unavailable')]);
+            }
+
+            $user->name = trim(($user->first_name ?? '').' '.($user->last_name ?? '')) ?: ($user->name ?? '');
+        });
+    }
+
+    public function emailAliases(): HasMany
+    {
+        return $this->hasMany(EmailAlias::class);
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('avatars')
+            ->useDisk(config('avatar-manager.profile_photo_disk', 'public'))
+            ->singleFile();
+    }
+
+    public function preferredLocale(): ?string
+    {
+        $locale = $this->getAttribute('locale');
+
+        return is_string($locale) && $locale !== '' ? $locale : null;
     }
 }
