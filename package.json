@@ -19,7 +19,7 @@
         "@inertiajs/vue3": "^3.0.0",
         "@lucide/vue": "^1.41.0",
         "@primeuix/themes": "^2.0.3",
-        "@vueuse/core": "^14",
+        "@vueuse/core": "^15",
         "chokidar": "^5.0.0",
         "laravel-vue-i18n": "^2.8.0",
         "primevue": "^4.4.0",
