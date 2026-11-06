@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b17528d9c2a26ac5e9d70f7c67ec38a3",
+    "content-hash": "888b806edadf5edaece7bbb555b94d5e",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -3503,16 +3503,16 @@
         },
         {
             "name": "mapo-89/core-panel",
-            "version": "1.6.3",
+            "version": "1.7.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mapo-89/core-panel.git",
-                "reference": "a91b168f8a54323b42d5c9810e77b364b413a624"
+                "reference": "058c2ee09585eb537b2fbcaf5f85574bdfd2efed"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mapo-89/core-panel/zipball/a91b168f8a54323b42d5c9810e77b364b413a624",
-                "reference": "a91b168f8a54323b42d5c9810e77b364b413a624",
+                "url": "https://api.github.com/repos/mapo-89/core-panel/zipball/058c2ee09585eb537b2fbcaf5f85574bdfd2efed",
+                "reference": "058c2ee09585eb537b2fbcaf5f85574bdfd2efed",
                 "shasum": ""
             },
             "require": {
@@ -3564,9 +3564,10 @@
             "description": "A Laravel admin starter kit built with Inertia, Vue, Tailwind CSS, Fortify, Passport, Horizon, and Wayfinder.",
             "support": {
                 "issues": "https://github.com/mapo-89/core-panel/issues",
-                "source": "https://github.com/mapo-89/core-panel/tree/1.6.3"
+                "source": "https://github.com/mapo-89/core-panel/tree/1.7.1"
             },
-            "time": "2026-10-27T01:45:46+00:00"
+            "time": "2026-11-06T11:38:09+00:00",
+            "published-time": "2026-11-06T11:45:56+00:00"
         },
         {
             "name": "mapo-89/laravel-avatar-manager",
@@ -12970,5 +12971,5 @@
         "php": "^8.5"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.11.0"
 }

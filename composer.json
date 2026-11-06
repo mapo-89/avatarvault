@@ -12,7 +12,7 @@
         "php": "^8.5",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
-        "mapo-89/core-panel": "^1.6.3",
+        "mapo-89/core-panel": "^1.7.1",
         "mapo-89/laravel-avatar-manager": "^2.0"
     },
     "require-dev": {

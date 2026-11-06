@@ -19,7 +19,7 @@
         "@blade-flags/core": "^0.3.0",
         "@inertiajs/vue3": "^3.11.0",
         "@lucide/vue": "^1.66.0",
-        "@primeuix/themes": "^2.0.3",
+        "@primeuix/themes": "^3.1.0",
         "@vueuse/core": "^15",
         "chokidar": "^5.0.0",
         "laravel-vue-i18n": "^2.9.0",
