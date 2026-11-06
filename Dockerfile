@@ -1,6 +1,6 @@
-FROM php:8.5.11-fpm-bookworm@sha256:9e1dc1e2000d88569f9673eb58b6026fe242067084d9008ceafb516a566574e3
+FROM php:8.5.12-fpm-bookworm@sha256:eec275cd99580e0a6e103dd343a7c160c86917003f6b9bba2d4c75d82419c683
 
-RUN php -r 'exit(version_compare(PHP_VERSION, "8.4.27", ">=") ? 0 : 1);'
+RUN php -r 'exit(version_compare(PHP_VERSION, "8.5.12", ">=") ? 0 : 1);'
 
 WORKDIR /var/www/avatarvault
 
