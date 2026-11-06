@@ -149,3 +149,17 @@ jobs:
       - run: composer install --no-interaction --no-progress --prefer-dist
       - name: Verify schema and legacy migration against PostgreSQL
         run: vendor/bin/phpunit --filter=LegacyMigrationTest
+
+  docker-runtime:
+    name: Docker production runtime
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build locked application runtime
+        run: docker build --tag avatarvault-runtime:ci .
+      - name: Check production PHP platform requirements
+        run: >-
+          docker run --rm --entrypoint composer
+          --volume "$PWD:/var/www/avatarvault:ro"
+          avatarvault-runtime:ci check-platform-reqs --lock --no-dev
