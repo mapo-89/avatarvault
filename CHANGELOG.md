@@ -2,6 +2,19 @@
 
 All notable changes to `laravel-avatar-vault` will be documented in this file
 
+## v1.0.1 - 2026-11-06
+
+### 🔧 Chores
+- Bump actions/checkout from 5 to 7
+- Bump actions/setup-node from 4 to 7
+- Bump phpunit/phpunit from 12.5.43 to 13.4.6
+- Bump @vueuse/core from 14.3.0 to 15.0.0
+- Bump @types/node from 25.6.2 to 26.6.6
+- Align Docker runtime with PHP 8.5.12 and verify its platform
+- Refresh frontend dependencies with a consistent npm lockfile
+- Run TypeScript 7 alongside the supported Vue compiler API
+- Upgrade Themes 3 using the CorePanel 1.7.1 compatibility fix
+
 ## v1.0.0 - 2026-11-05
 
 Initial release.
