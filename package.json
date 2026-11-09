@@ -23,7 +23,7 @@
         "@vueuse/core": "^15",
         "chokidar": "^5.0.0",
         "laravel-vue-i18n": "^2.9.0",
-        "primevue": "^4.4.0",
+        "primevue": "^5.0.4",
         "vue": "^3.5.0"
     },
     "devDependencies": {
