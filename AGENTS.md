@@ -49,3 +49,15 @@ just to satisfy an update. Compatibility breaks require an explicit major releas
 Collect dependency updates with the other work; prepare once when the release
 scope is complete, refreshing only at finalization if later commits were added.
 No bot commit authorizes a release.
+
+## Shared CI standards
+
+CI uses the private Gitea repository mapo-89/ci-standards, pinned by full commit SHA
+in .ci/standards.json. Shared check commands live there; keep project-specific
+services, runtime matrices and extra checks in the project workflow. The bootstrap
+uses only the dedicated repository-read CI_STANDARDS_TOKEN secret. Never reuse
+publication/deployment credentials or replace the immutable pin with a branch.
+A metadata-only preparation commit or unchanged release merge may use the shared
+short check only when configured version fields, file modes and exact successful
+source CI are verified. Any other change or missing proof requires full CI. Exact
+current-commit CI and release-policy success remain mandatory before publication.

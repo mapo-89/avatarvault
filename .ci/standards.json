@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "source": {
+    "url": "https://git.postler.de/mapo-89/ci-standards.git",
+    "ref": "efde42b0623ac122c1aad9cfdae2060c13d6e008"
+  },
+  "profile": "laravel-inertia"
+}

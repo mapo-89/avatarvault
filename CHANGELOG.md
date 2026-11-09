@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-avatar-vault` will be documented in this file
 
+## v1.0.2 - 2026-11-09
+
+### 🔒 Security
+- Require exact main CI before publishing releases
+
+### 🔧 Chores
+- Adopt pinned shared CI standards
+
 ## v1.0.1 - 2026-11-06
 
 ### 🔧 Chores

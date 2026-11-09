@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: read
     steps:
       - uses: actions/checkout@v7
         with:
@@ -55,6 +56,16 @@ jobs:
         env:
           RELEASE_VERSION: ${{ steps.plan.outputs.version }}
         run: node .release/release.mjs notes --version "$RELEASE_VERSION" > "$RUNNER_TEMP/release-notes.md"
+      - name: Load pinned CI standards
+        if: steps.plan.outputs.should_release == 'true'
+        env:
+          CI_STANDARDS_TOKEN: ${{ secrets.CI_STANDARDS_TOKEN }}
+        run: bash "$GITHUB_WORKSPACE/.ci/bootstrap.sh"
+      - name: Require successful CI on the exact main merge
+        if: steps.plan.outputs.should_release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node "$CI_STANDARDS_DIR/release/ci.mjs" publish
       - name: Publish release
         if: steps.plan.outputs.should_release == 'true'
         env:
