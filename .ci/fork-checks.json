@@ -1,0 +1,14 @@
+{
+  "ref": "efde42b0623ac122c1aad9cfdae2060c13d6e008",
+  "checks": {
+    "composer.audit": "composer audit",
+    "composer.install": "composer install --no-interaction --no-progress --prefer-dist",
+    "composer.package-validate": "composer validate --no-check-publish",
+    "composer.platform": "composer check-platform-reqs",
+    "composer.style": "composer check-style",
+    "composer.validate": "composer check-composer\ncomposer check-autoload",
+    "frontend.audit": "npm run audit",
+    "laravel.environment": "cp .env.example .env",
+    "laravel.prepare": "php artisan key:generate --ansi\nphp artisan config:clear"
+  }
+}

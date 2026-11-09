@@ -5,7 +5,7 @@ on:
     branches: [main, 'release/**']
     types: [opened, synchronize, reopened, edited, ready_for_review]
   push:
-    branches: [main, 'release/**']
+    branches: [main, 'release/**', 'chore/ci-standards']
   workflow_dispatch:
 
 permissions:
@@ -16,7 +16,45 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  release_snapshot:
+    name: Verify release snapshot
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      metadata_only: ${{ steps.snapshot.outputs.metadata_only }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Load pinned CI standards
+        env:
+          CI_STANDARDS_FORK: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name && github.event.pull_request.head.repo.full_name != github.repository }}
+          CI_STANDARDS_TOKEN: ${{ secrets.CI_STANDARDS_TOKEN }}
+        run: bash "$GITHUB_WORKSPACE/.ci/bootstrap.sh"
+      - name: Verify exact tested release source
+        id: snapshot
+        env:
+          CI_STANDARDS_FORK: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name && github.event.pull_request.head.repo.full_name != github.repository }}
+          GH_TOKEN: ${{ github.token }}
+          CI_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          CI_SOURCE_BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          if [ "$CI_STANDARDS_FORK" = true ]; then
+            echo "metadata_only=false" >> "$GITHUB_OUTPUT"
+          else
+            node "$CI_STANDARDS_DIR/lib/release-check.mjs"
+          fi
+
   application:
+    needs: release_snapshot
+    if: needs.release_snapshot.outputs.metadata_only != 'true'
     name: Application checks (PHP ${{ matrix.php }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -34,6 +72,12 @@ jobs:
       MAIL_MAILER: array
     steps:
       - uses: actions/checkout@v7
+      - name: Load pinned CI standards
+        shell: bash
+        env:
+          CI_STANDARDS_FORK: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name && github.event.pull_request.head.repo.full_name != github.repository }}
+          CI_STANDARDS_TOKEN: ${{ secrets.CI_STANDARDS_TOKEN }}
+        run: bash "$GITHUB_WORKSPACE/.ci/bootstrap.sh"
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
@@ -41,23 +85,19 @@ jobs:
           extensions: ctype, curl, dom, exif, fileinfo, gd, intl, mbstring, pdo_mysql, pdo_sqlite, sqlite3, tokenizer, xml, zip, bcmath
           coverage: none
       - name: Prepare isolated configuration
-        run: cp .env.example .env
+        run: node "$GITHUB_WORKSPACE/.ci/run-check.mjs" laravel.environment
       - name: Validate Composer manifest
-        run: composer validate --no-check-publish
+        run: node "$GITHUB_WORKSPACE/.ci/run-check.mjs" composer.package-validate
       - name: Install locked dependencies
-        run: composer install --no-interaction --no-progress --prefer-dist
+        run: node "$GITHUB_WORKSPACE/.ci/run-check.mjs" composer.install
       - name: Validate Composer and PSR-4 loading
-        run: |
-          composer check-composer
-          composer check-autoload
+        run: node "$GITHUB_WORKSPACE/.ci/run-check.mjs" composer.validate
       - name: Audit Composer dependencies
-        run: composer audit
+        run: node "$GITHUB_WORKSPACE/.ci/run-check.mjs" composer.audit
       - name: Check installed runtime requirements
-        run: composer check-platform-reqs
+        run: node "$GITHUB_WORKSPACE/.ci/run-check.mjs" composer.platform
       - name: Prepare application
-        run: |
-          php artisan key:generate --ansi
-          php artisan config:clear
+        run: node "$GITHUB_WORKSPACE/.ci/run-check.mjs" laravel.prepare
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
@@ -68,11 +108,13 @@ jobs:
           npm run lint
           npm run build
       - name: Check PHP formatting
-        run: composer check-style
+        run: node "$GITHUB_WORKSPACE/.ci/run-check.mjs" composer.style
       - name: Run application tests
         run: vendor/bin/phpunit
 
   minimum-runtime:
+    needs: release_snapshot
+    if: needs.release_snapshot.outputs.metadata_only != 'true'
     name: Production runtime (PHP 8.5)
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -84,13 +126,19 @@ jobs:
       SESSION_DRIVER: array
     steps:
       - uses: actions/checkout@v7
+      - name: Load pinned CI standards
+        shell: bash
+        env:
+          CI_STANDARDS_FORK: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name && github.event.pull_request.head.repo.full_name != github.repository }}
+          CI_STANDARDS_TOKEN: ${{ secrets.CI_STANDARDS_TOKEN }}
+        run: bash "$GITHUB_WORKSPACE/.ci/bootstrap.sh"
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
           tools: composer:v2
           extensions: ctype, curl, dom, exif, fileinfo, gd, intl, mbstring, pdo_mysql, pdo_sqlite, sqlite3, tokenizer, xml, zip, bcmath
           coverage: none
-      - run: cp .env.example .env
+      - run: node "$GITHUB_WORKSPACE/.ci/run-check.mjs" laravel.environment
       - run: composer install --no-dev --no-interaction --no-progress --prefer-dist
       - run: composer check-platform-reqs --no-dev
       - name: Boot application on supported minimum
@@ -100,6 +148,8 @@ jobs:
           php artisan route:list --except-vendor
 
   dependency-audit:
+    needs: release_snapshot
+    if: needs.release_snapshot.outputs.metadata_only != 'true'
     name: Frontend dependency audit
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -107,13 +157,21 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v7
+      - name: Load pinned CI standards
+        shell: bash
+        env:
+          CI_STANDARDS_FORK: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name && github.event.pull_request.head.repo.full_name != github.repository }}
+          CI_STANDARDS_TOKEN: ${{ secrets.CI_STANDARDS_TOKEN }}
+        run: bash "$GITHUB_WORKSPACE/.ci/bootstrap.sh"
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
       - name: Audit locked frontend dependencies
-        run: npm run audit
+        run: node "$GITHUB_WORKSPACE/.ci/run-check.mjs" frontend.audit
 
   postgres-migrations:
+    needs: release_snapshot
+    if: needs.release_snapshot.outputs.metadata_only != 'true'
     name: PostgreSQL migration compatibility
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -140,17 +198,25 @@ jobs:
       SESSION_DRIVER: array
     steps:
       - uses: actions/checkout@v7
+      - name: Load pinned CI standards
+        shell: bash
+        env:
+          CI_STANDARDS_FORK: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name && github.event.pull_request.head.repo.full_name != github.repository }}
+          CI_STANDARDS_TOKEN: ${{ secrets.CI_STANDARDS_TOKEN }}
+        run: bash "$GITHUB_WORKSPACE/.ci/bootstrap.sh"
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
           tools: composer:v2
           extensions: ctype, curl, dom, exif, fileinfo, gd, intl, mbstring, pdo_pgsql, tokenizer, xml, zip, bcmath
           coverage: none
-      - run: composer install --no-interaction --no-progress --prefer-dist
+      - run: node "$GITHUB_WORKSPACE/.ci/run-check.mjs" composer.install
       - name: Verify schema and legacy migration against PostgreSQL
         run: vendor/bin/phpunit --filter=LegacyMigrationTest
 
   docker-runtime:
+    needs: release_snapshot
+    if: needs.release_snapshot.outputs.metadata_only != 'true'
     name: Docker production runtime
     runs-on: ubuntu-latest
     timeout-minutes: 20
