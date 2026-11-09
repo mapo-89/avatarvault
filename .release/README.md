@@ -225,3 +225,8 @@ PHP 8.5, checks PostgreSQL migration compatibility, and builds the Vite frontend
 It runs for PRs to main/release branches, including target-branch edits, and for
 pushes to those branches. CI workflows do not publish or deploy. Hosted execution
 and private registry/package access must be verified after these changes are pushed.
+
+## Shared CI standards
+
+Common checks and strict metadata-only release verification use the private Gitea repository mapo-89/ci-standards. .ci/standards.json pins its exact commit; .ci/bootstrap.sh loads it with the repository-read CI_STANDARDS_TOKEN Actions secret. Project services, runtime matrices and additional checks stay local. Pure version preparation and unchanged release merges use a short check only with exact successful source CI proof; otherwise all application checks run.
+Fork PRs without private secrets run every application check using the generated pinned command snapshot in .ci/fork-checks.json. They cannot use the release shortcut. Internal CI verifies this snapshot and its runner against the private standard; regenerate them after each source pin update.
