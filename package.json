@@ -21,7 +21,7 @@
         "@lucide/vue": "^1.66.0",
         "@primeuix/themes": "^3.1.0",
         "@vueuse/core": "^15",
-        "chokidar": "^5.0.0",
+        "chokidar": "^6.0.0",
         "laravel-vue-i18n": "^2.9.0",
         "primevue": "^4.4.0",
         "vue": "^3.5.0"
