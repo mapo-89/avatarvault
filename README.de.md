@@ -11,6 +11,9 @@
 [![CorePanel](https://img.shields.io/badge/CorePanel-1.7.1-174a3f.svg)](https://github.com/mapo-89/core-panel-monorepo)
 [![Avatar Manager](https://img.shields.io/badge/Avatar%20Manager-2.0-174a3f.svg)](https://github.com/mapo-89/laravel-avatar-manager)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE.md)
+[![GitHub issues](https://img.shields.io/github/issues/mapo-89/avatarvault.svg)](https://github.com/mapo-89/avatarvault/issues)
+[![GitHub stars](https://img.shields.io/github/stars/mapo-89/avatarvault.svg?style=flat)](https://github.com/mapo-89/avatarvault/stargazers)
+[![Last commit](https://img.shields.io/github/last-commit/mapo-89/avatarvault.svg)](https://github.com/mapo-89/avatarvault/commits/main)
 
 <a href="https://buymeacoffee.com/mapo"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="60"></a>
 
