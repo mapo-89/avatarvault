@@ -1,6 +1,6 @@
 FROM node:26-bookworm AS node
 
-FROM serversideup/php:8.5-fpm-nginx AS php-extension-base
+FROM serversideup/php:8.6-fpm-nginx AS php-extension-base
 
 ARG POSTGRES_CLIENT_MAJOR=18
 
