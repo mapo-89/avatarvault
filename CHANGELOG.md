@@ -2,6 +2,22 @@
 
 All notable changes to `laravel-avatar-vault` will be documented in this file
 
+## v1.0.3 - 2026-11-24
+
+### 📝 Documentation
+- Streamline READMEs and remove branding studies
+- Restore repository badges
+
+### 🔧 Chores
+- Suppress PrimeVue major dependency updates
+- Update setup-node to v7
+- Update Composer dependencies
+- Update Chokidar to version 6
+- Update npm minor and patch dependencies
+
+### 🚀 Deployment
+- Adopt the CorePanel Docker runtime
+
 ## v1.0.2 - 2026-11-09
 
 ### 🔒 Security
