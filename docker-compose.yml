@@ -1,0 +1,48 @@
+x-runtime: &runtime
+  image: ${AVATARVAULT_IMAGE:-avatarvault:local}
+  env_file: .env
+  environment:
+    APP_ENV: production
+    APP_DEBUG: "false"
+    RUN_MIGRATIONS: "false"
+  restart: unless-stopped
+  volumes:
+    - storage:/var/www/html/storage
+
+services:
+  app:
+    <<: *runtime
+    build:
+      context: .
+      target: app-prod
+    ports:
+      - "${APP_PORT:-8000}:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/up"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  scheduler:
+    <<: *runtime
+    profiles: [scheduler]
+    command: ["php", "artisan", "schedule:work"]
+    healthcheck:
+      test: ["CMD", "healthcheck-schedule"]
+    depends_on:
+      app:
+        condition: service_healthy
+
+  horizon:
+    <<: *runtime
+    profiles: [horizon]
+    command: ["php", "artisan", "horizon"]
+    healthcheck:
+      test: ["CMD", "healthcheck-horizon"]
+    depends_on:
+      app:
+        condition: service_healthy
+
+volumes:
+  storage:
