@@ -30,7 +30,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '24'
       - name: Load pinned CI standards
@@ -223,9 +223,34 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Build locked application runtime
-        run: docker build --tag avatarvault-runtime:ci .
+        run: docker build --target app-prod --tag avatarvault-runtime:ci .
       - name: Check production PHP platform requirements
         run: >-
           docker run --rm --entrypoint composer
-          --volume "$PWD:/var/www/avatarvault:ro"
-          avatarvault-runtime:ci check-platform-reqs --lock --no-dev
+          avatarvault-runtime:ci check-platform-reqs --no-dev
+      - name: Verify bundled application and assets over HTTP
+        shell: bash
+        run: |
+          set -euo pipefail
+          container="$(docker run -d --publish 127.0.0.1::8080 \
+            -e APP_ENV=testing -e DB_CONNECTION=sqlite -e DB_DATABASE=:memory: \
+            -e CACHE_STORE=array -e SESSION_DRIVER=array -e QUEUE_CONNECTION=sync \
+            -e APP_KEY=base64:YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE= \
+            avatarvault-runtime:ci)"
+          trap 'docker rm -f "$container" >/dev/null' EXIT
+          trap 'docker logs "$container"' ERR
+          address="$(docker port "$container" 8080/tcp)"
+          curl -fsS -o /dev/null --retry 30 --retry-delay 2 --retry-all-errors "http://$address/up"
+          asset="$(docker exec "$container" php -r '
+              $manifest = json_decode(file_get_contents("public/build/manifest.json"), true, flags: JSON_THROW_ON_ERROR);
+              foreach ($manifest as $entry) {
+                  if (!empty($entry["isEntry"])) {
+                      echo $entry["file"];
+                      exit(0);
+                  }
+              }
+              exit(1);
+          ')"
+          curl -fsS -o /dev/null "http://$address/build/$asset"
+          test "$(docker exec "$container" id -u)" -ne 0
+          docker exec "$container" test ! -f /var/www/html/.env
