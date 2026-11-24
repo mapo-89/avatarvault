@@ -60,6 +60,8 @@ The public document root must point at `public/`. Store the application key,
 database and `storage/` persistently. Set `APP_ENV=production` and
 `APP_DEBUG=false` for production.
 
+For a self-contained Nginx/PHP image, see [Docker deployment](docs/operations.md#docker-deployment).
+
 ### First administrator
 
 Register a normal account, then grant administration explicitly:

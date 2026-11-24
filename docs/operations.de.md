@@ -152,3 +152,34 @@ ungelöste Bilder mit einem Fehlerstatus. Kein `migrate:fresh` verwenden.
 Die Installation der Abhängigkeiten migriert keine Produktionsdaten. Nach
 Schemaänderungen benötigt ein Rollback die passende Datenbank-/Dateisicherung
 und den vorherigen Checkout; erhaltene Altdateien ersetzen kein Backup.
+
+## Docker-Betrieb
+
+Das Produktionsimage nach CorePanel-Standard enthält PHP 8.5, Nginx, die
+Composer-Abhängigkeiten und die gebauten Frontend-Dateien. Es lauscht auf Port
+8080 und bietet den Laravel-Healthcheck unter `/up`. Der Container läuft als
+`www-data`.
+
+`APP_KEY`, `APP_URL`, Datenbankzugang und Mailversand in `.env` konfigurieren.
+Der Datenbankhost muss aus dem Container erreichbar sein. Bei einer bestehenden
+Installation App-Schlüssel, Datenbank und das gesamte Storage-Verzeichnis
+übernehmen. Dazu die Dateien im Compose-Volume wiederherstellen oder das
+bestehende Storage-Verzeichnis einbinden. `www-data` benötigt Schreibrechte
+darauf. Den Reverse Proxy auf den veröffentlichten HTTP-Port richten.
+
+```bash
+docker compose build app
+docker compose run --rm --no-deps app php artisan migrate --force
+docker compose run --rm --no-deps app php artisan core-panel:sync-access
+docker compose run --rm --no-deps app php artisan passport:keys
+docker compose up -d app
+```
+
+Für eine Neuinstallation mit
+`docker compose run --rm --no-deps --entrypoint php app artisan key:generate --show`
+einen Schlüssel erzeugen und vor den Artisan-Schritten in `.env` hinterlegen.
+`APP_PORT` ändert den veröffentlichten Port. Das Compose-Profil `scheduler`
+startet geplante Aufgaben. Das Profil `horizon` setzt Redis-Queues und aktiviertes
+Horizon voraus. Beim Import alter Bilder die [Migrationsanleitung](#bestehende-installation-umstellen)
+beachten. Vertrauenswürdige Reverse Proxies vor dem Build in
+`bootstrap/trust_proxies.php` konfigurieren.

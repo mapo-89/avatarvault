@@ -60,6 +60,8 @@ Der Webserver muss `public/` als Document Root verwenden. App-Schlüssel,
 Datenbank und `storage/` dauerhaft speichern. In Produktion `APP_ENV=production`
 und `APP_DEBUG=false` setzen.
 
+Das Image mit Nginx und PHP ist im [Docker-Betrieb](docs/operations.de.md#docker-betrieb) beschrieben.
+
 ### Erstes Administratorkonto
 
 Ein normales Konto registrieren und Administratorrechte ausdrücklich vergeben:

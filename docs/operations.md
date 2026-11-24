@@ -147,3 +147,33 @@ returns a nonzero status for unresolved images. Do not use `migrate:fresh`.
 Production data is not migrated by dependency installation alone. Rollback after
 schema changes requires the matching database/file backup and previous checkout;
 retained legacy files are not a substitute for that backup.
+
+## Docker deployment
+
+The CorePanel-based production image bundles PHP 8.5, Nginx, Composer
+dependencies and compiled frontend assets. It listens on port 8080 and serves
+the Laravel health endpoint at `/up`. The image runs as `www-data`.
+
+Set `APP_KEY`, `APP_URL`, the database connection and mail settings in `.env`.
+Use a database hostname reachable from the container. When migrating an existing
+installation, keep its application key, database and entire storage directory.
+Restore storage into the Compose volume, or replace the volume mount with your
+existing storage directory. The storage mount must be writable by `www-data`.
+Point the reverse proxy to the published HTTP port.
+
+```bash
+docker compose build app
+docker compose run --rm --no-deps app php artisan migrate --force
+docker compose run --rm --no-deps app php artisan core-panel:sync-access
+docker compose run --rm --no-deps app php artisan passport:keys
+docker compose up -d app
+```
+
+For a fresh installation, generate a key with
+`docker compose run --rm --no-deps --entrypoint php app artisan key:generate --show`
+and put it in `.env` before running the application. Set `APP_PORT` to change
+the published port. Enable the `scheduler` Compose profile for scheduled tasks
+and the `horizon` profile when Redis queues and Horizon are configured.
+Use the [migration instructions](#migrate-an-existing-installation) when importing
+legacy avatars. For reverse proxies, configure trusted addresses in
+`bootstrap/trust_proxies.php` before building the image.
